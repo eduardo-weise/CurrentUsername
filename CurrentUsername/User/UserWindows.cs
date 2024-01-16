@@ -12,24 +12,17 @@ public class UserWindows : IUser
         Console.WriteLine("Usuário logado: {0}", Environment.UserName);
         Console.WriteLine("Usuário logado: {0}", WindowsIdentity.GetCurrent().Name);
 
-        ManagementObjectSearcher win32_ComputerSystem = new("SELECT UserName FROM Win32_ComputerSystem");
-        foreach (ManagementObject queryObj in win32_ComputerSystem.Get().Cast<ManagementObject>())
-        {
-            Console.WriteLine("Usuário logado: {0}", queryObj["UserName"]);
-        }
+        FindUser("UserName", "Win32_ComputerSystem");
+        FindUser("Antecedent", "Win32_LoggedOnUser");
+        //FindUser("Name", "Win32_UserAccount");
+    }
 
-        ManagementObjectSearcher win32_UserAccount = new("SELECT Name FROM Win32_UserAccount");
-        foreach (ManagementObject queryObj in win32_UserAccount.Get().Cast<ManagementObject>())
+    public static void FindUser(string property, string dba)
+    {
+        ManagementObjectSearcher searcher = new($"SELECT {property} FROM {dba}");
+        foreach (ManagementObject queryObj in searcher.Get().Cast<ManagementObject>())
         {
-            Console.WriteLine("Usuário logado: {0}", queryObj["Name"]);
-            // Outras propriedades como Domain, Status, etc.
-        }
-
-        ManagementObjectSearcher win32_LoggedOnUser = new("SELECT * FROM Win32_LoggedOnUser");
-        foreach (ManagementObject queryObj in win32_LoggedOnUser.Get().Cast<ManagementObject>())
-        {
-            Console.WriteLine("Antecedent: {0}", queryObj["Antecedent"]);
-            Console.WriteLine("Dependent: {0}", queryObj["Dependent"]);
+            Console.WriteLine("Usuário logado: {0}", queryObj.GetPropertyValue(property));
         }
     }
 }
